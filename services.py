@@ -1,48 +1,37 @@
 import asyncio
 import logging
-import os
 
-from dotenv import load_dotenv
-from fastapi import HTTPException
 from google import genai
 from google.genai import types
 
 from constants import DEFAULT_MAX_RETRIES, INITIAL_RETRY_DELAY_SECONDS, PROMPT, RETRY_BACKOFF_FACTOR
 from schemas import MedicalReport
 
-load_dotenv()
-
 logger = logging.getLogger("medi-backend")
 
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.6-flash")
 
-client = None
-if GEMINI_API_KEY:
-    client = genai.Client(api_key=GEMINI_API_KEY)
-else:
-    logger.warning("GEMINI_API_KEY environment variable not set.")
-
-
-async def generate_content_with_retry(file_bytes: bytes, mime_type: str, max_retries: int = DEFAULT_MAX_RETRIES):
+async def generate_content_with_retry(
+    file_bytes: bytes,
+    mime_type: str,
+    api_key: str,
+    model: str,
+    max_retries: int = DEFAULT_MAX_RETRIES,
+):
     """
     Executes Gemini API content generation with exponential backoff on 429 (Rate Limit) errors.
+    Builds a per-request Gemini client from the caller-supplied API key.
     """
-    if not GEMINI_API_KEY or client is None:
-        raise HTTPException(
-            status_code=500,
-            detail="GEMINI_API_KEY is not configured on the server. Please set GEMINI_API_KEY environment variable."
-        )
+    client = genai.Client(api_key=api_key)
 
     delay = INITIAL_RETRY_DELAY_SECONDS
     last_exception = None
 
     for attempt in range(1, max_retries + 1):
         try:
-            logger.info(f"Sending extraction request to Gemini ({GEMINI_MODEL}) - Attempt {attempt}/{max_retries}")
+            logger.info(f"Sending extraction request to Gemini ({model}) - Attempt {attempt}/{max_retries}")
 
             resp = await client.aio.models.generate_content(
-                model=GEMINI_MODEL,
+                model=model,
                 contents=[
                     types.Part.from_bytes(data=file_bytes, mime_type=mime_type),
                     PROMPT,

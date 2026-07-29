@@ -2,8 +2,10 @@ APP_TITLE = "MediReport AI Extractor API"
 APP_DESCRIPTION = "Medical Report Extraction using Gemini 3.6 Flash & FastAPI"
 APP_VERSION = "1.0.0"
 
-DEFAULT_CORS_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"]
-CORS_ALLOW_CREDENTIALS = True
+# Auth is via the X-Gemini-Api-Key header, not cookies, so a wildcard origin is
+# safe here and allow_credentials must stay False (invalid combination otherwise).
+CORS_ALLOW_ORIGINS = ["*"]
+CORS_ALLOW_CREDENTIALS = False
 CORS_ALLOW_METHODS = ["*"]
 CORS_ALLOW_HEADERS = ["*"]
 
