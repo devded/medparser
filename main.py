@@ -15,7 +15,7 @@ from constants import (
     CORS_ALLOW_ORIGINS,
     MAX_UPLOAD_SIZE_BYTES,
 )
-from html_template import HOME_HTML
+from index import HOME_HTML
 from services import generate_content_with_retry
 from utils import resolve_mime_type
 
