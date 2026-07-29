@@ -1,8 +1,7 @@
 import logging
-import os
+from typing import Optional
 
-from dotenv import load_dotenv
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
 from constants import (
@@ -12,13 +11,11 @@ from constants import (
     CORS_ALLOW_CREDENTIALS,
     CORS_ALLOW_HEADERS,
     CORS_ALLOW_METHODS,
-    DEFAULT_CORS_ORIGINS,
+    CORS_ALLOW_ORIGINS,
     MAX_UPLOAD_SIZE_BYTES,
 )
-from services import GEMINI_API_KEY, GEMINI_MODEL, generate_content_with_retry
+from services import generate_content_with_retry
 from utils import resolve_mime_type
-
-load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("medi-backend")
@@ -29,22 +26,10 @@ app = FastAPI(
     version=APP_VERSION,
 )
 
-
-def _resolve_cors_origins() -> list[str]:
-    """
-    Reads CORS_ORIGINS from the environment as a comma-separated list
-    (e.g. "https://app.example.com,https://staging.example.com").
-    Falls back to DEFAULT_CORS_ORIGINS (local Next.js dev) if unset/empty.
-    """
-    raw = os.environ.get("CORS_ORIGINS", "")
-    origins = [origin.strip() for origin in raw.split(",") if origin.strip()]
-    return origins or DEFAULT_CORS_ORIGINS
-
-
-# Enable CORS for the Next.js / React frontend
+# Open to any origin: auth is via the X-Gemini-Api-Key header, not cookies.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=_resolve_cors_origins(),
+    allow_origins=CORS_ALLOW_ORIGINS,
     allow_credentials=CORS_ALLOW_CREDENTIALS,
     allow_methods=CORS_ALLOW_METHODS,
     allow_headers=CORS_ALLOW_HEADERS,
@@ -55,17 +40,28 @@ app.add_middleware(
 async def health_check():
     return {
         "status": "online",
-        "model": GEMINI_MODEL,
-        "api_key_configured": bool(GEMINI_API_KEY)
+        "required_headers": ["X-Gemini-Api-Key", "X-Gemini-Model"],
     }
 
 
 @app.post("/extract")
-async def extract(file: UploadFile = File(...)):
+async def extract(
+    file: UploadFile = File(...),
+    x_gemini_api_key: Optional[str] = Header(None, alias="X-Gemini-Api-Key"),
+    x_gemini_model: Optional[str] = Header(None, alias="X-Gemini-Model"),
+):
     """
     Extract structured medical report data from an uploaded PDF or image (JPEG/PNG/WEBP/HEIC)
-    of a medical report using Gemini 3.6 Flash.
+    of a medical report using Gemini. Caller must supply their own Gemini API key and model via
+    the X-Gemini-Api-Key and X-Gemini-Model headers — the server holds no Gemini config itself.
     """
+    if not x_gemini_api_key:
+        raise HTTPException(status_code=401, detail="Missing required 'X-Gemini-Api-Key' header.")
+    if not x_gemini_model:
+        raise HTTPException(status_code=400, detail="Missing required 'X-Gemini-Model' header.")
+
+    model = x_gemini_model
+
     mime_type = resolve_mime_type(file.content_type, file.filename or "")
     if mime_type is None:
         raise HTTPException(
@@ -83,7 +79,7 @@ async def extract(file: UploadFile = File(...)):
         )
 
     try:
-        resp = await generate_content_with_retry(file_bytes, mime_type)
+        resp = await generate_content_with_retry(file_bytes, mime_type, x_gemini_api_key, model)
     except HTTPException:
         raise
     except Exception as e:
@@ -93,11 +89,13 @@ async def extract(file: UploadFile = File(...)):
                 status_code=429,
                 detail="Gemini API rate limit exceeded. Free tier limit reached. Please wait a moment and try again."
             )
+        if any(token in err_msg.upper() for token in ("401", "403", "PERMISSION_DENIED", "API_KEY_INVALID", "UNAUTHENTICATED")):
+            raise HTTPException(status_code=401, detail="Invalid or unauthorized Gemini API key.")
         raise HTTPException(status_code=502, detail=f"Gemini request failed: {err_msg}")
 
     # resp.parsed is a typed MedicalReport object
     return {
         "success": True,
-        "model_used": GEMINI_MODEL,
+        "model_used": model,
         "data": resp.parsed
     }
