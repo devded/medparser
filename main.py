@@ -3,6 +3,7 @@ from typing import Optional
 
 from fastapi import FastAPI, File, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 
 from constants import (
     APP_DESCRIPTION,
@@ -14,6 +15,7 @@ from constants import (
     CORS_ALLOW_ORIGINS,
     MAX_UPLOAD_SIZE_BYTES,
 )
+from html_template import HOME_HTML
 from services import generate_content_with_retry
 from utils import resolve_mime_type
 
@@ -34,6 +36,14 @@ app.add_middleware(
     allow_methods=CORS_ALLOW_METHODS,
     allow_headers=CORS_ALLOW_HEADERS,
 )
+
+
+@app.get("/", response_class=HTMLResponse)
+async def home():
+    """
+    Returns an interactive HTML overview webpage explaining how to use the API.
+    """
+    return HTMLResponse(content=HOME_HTML)
 
 
 @app.get("/health")
