@@ -9,17 +9,25 @@ HOME_HTML = """<!DOCTYPE html>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0f172a;
-      --card-bg: #1e293b;
-      --card-border: #334155;
-      --primary: #38bdf8;
-      --primary-hover: #0284c7;
-      --accent: #a855f7;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --success: #22c55e;
-      --danger: #ef4444;
-      --code-bg: #090d16;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --card-border: #e2e8f0;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --accent: #7c3aed;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --code-bg: #0f172a;
+      --code-text: #f8fafc;
+      --step-bg: #f8fafc;
+      --badge-bg: #e0f2fe;
+      --badge-border: #bae6fd;
+      --badge-text: #0369a1;
+      --input-bg: #ffffff;
+      --input-border: #cbd5e1;
+      --shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 4px 6px -2px rgba(15, 23, 42, 0.04);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -27,10 +35,10 @@ HOME_HTML = """<!DOCTYPE html>
       background-color: var(--bg);
       color: var(--text);
       line-height: 1.6;
-      padding: 2rem 1rem;
+      padding: 2.5rem 1rem;
     }
     .container {
-      max-width: 900px;
+      max-width: 880px;
       margin: 0 auto;
     }
     header {
@@ -38,21 +46,22 @@ HOME_HTML = """<!DOCTYPE html>
       margin-bottom: 2.5rem;
     }
     .logo {
-      font-size: 3rem;
+      font-size: 3.2rem;
       margin-bottom: 0.5rem;
     }
     h1 {
-      font-size: 2.25rem;
+      font-size: 2.35rem;
       font-weight: 700;
       background: linear-gradient(135deg, var(--primary), var(--accent));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       margin-bottom: 0.75rem;
+      letter-spacing: -0.02em;
     }
     .subtitle {
       color: var(--text-muted);
       font-size: 1.1rem;
-      max-width: 650px;
+      max-width: 640px;
       margin: 0 auto 1.5rem;
     }
     .badges {
@@ -62,56 +71,58 @@ HOME_HTML = """<!DOCTYPE html>
       flex-wrap: wrap;
     }
     .badge {
-      background: rgba(56, 189, 248, 0.1);
-      border: 1px solid rgba(56, 189, 248, 0.25);
-      color: var(--primary);
-      padding: 0.25rem 0.75rem;
+      background: var(--badge-bg);
+      border: 1px solid var(--badge-border);
+      color: var(--badge-text);
+      padding: 0.25rem 0.8rem;
       border-radius: 9999px;
       font-size: 0.85rem;
-      font-weight: 500;
+      font-weight: 600;
     }
     .card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 1.75rem;
+      border-radius: 14px;
+      padding: 1.85rem;
       margin-bottom: 1.5rem;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+      box-shadow: var(--shadow);
     }
     .card-title {
       font-size: 1.25rem;
       font-weight: 600;
-      margin-bottom: 1rem;
+      color: var(--text);
+      margin-bottom: 1.25rem;
       display: flex;
       align-items: center;
       gap: 0.5rem;
     }
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 1rem;
     }
     .step-item {
-      background: rgba(15, 23, 42, 0.5);
+      background: var(--step-bg);
       border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 1rem;
+      border-radius: 10px;
+      padding: 1.1rem;
     }
     .step-num {
       display: inline-block;
-      width: 24px;
-      height: 24px;
+      width: 26px;
+      height: 26px;
       background: var(--primary);
-      color: #000;
-      font-weight: bold;
+      color: #ffffff;
+      font-weight: 700;
       border-radius: 50%;
       text-align: center;
-      line-height: 24px;
+      line-height: 26px;
       font-size: 0.85rem;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.6rem;
     }
     .step-title {
       font-weight: 600;
+      color: var(--text);
       margin-bottom: 0.25rem;
     }
     .step-desc {
@@ -120,83 +131,91 @@ HOME_HTML = """<!DOCTYPE html>
     }
     pre {
       background: var(--code-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 1rem;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      padding: 1.1rem;
       overflow-x: auto;
       font-family: 'Fira Code', monospace;
       font-size: 0.875rem;
-      color: #e2e8f0;
+      color: var(--code-text);
       margin-top: 0.5rem;
     }
-    code {
+    :not(pre) > code {
       font-family: 'Fira Code', monospace;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 0.15rem 0.35rem;
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 0.15rem 0.4rem;
       border-radius: 4px;
       font-size: 0.85em;
+      font-weight: 500;
     }
     .btn {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
       background: var(--primary);
-      color: #000;
+      color: #ffffff;
       font-weight: 600;
-      padding: 0.65rem 1.25rem;
-      border-radius: 8px;
+      padding: 0.7rem 1.35rem;
+      border-radius: 9px;
       text-decoration: none;
       border: none;
       cursor: pointer;
-      transition: background 0.2s ease;
+      transition: all 0.2s ease;
       font-size: 0.95rem;
+      box-shadow: 0 2px 4px rgba(2, 132, 199, 0.2);
     }
-    .btn:hover { background: var(--primary-hover); color: #fff; }
+    .btn:hover { background: var(--primary-hover); transform: translateY(-1px); }
     .btn-secondary {
-      background: transparent;
-      border: 1px solid var(--card-border);
+      background: #ffffff;
+      border: 1px solid var(--input-border);
       color: var(--text);
+      box-shadow: none;
     }
     .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: var(--text-muted);
+      background: #f1f5f9;
+      border-color: #94a3b8;
+      color: var(--text);
     }
     .form-group {
-      margin-bottom: 1rem;
+      margin-bottom: 1.1rem;
     }
     label {
       display: block;
       font-size: 0.875rem;
-      font-weight: 500;
-      margin-bottom: 0.35rem;
-      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      color: #334155;
     }
     input[type="text"], input[type="password"], select, input[type="file"] {
       width: 100%;
-      padding: 0.65rem 0.85rem;
-      background: var(--code-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
+      padding: 0.7rem 0.9rem;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 9px;
       color: var(--text);
       font-family: inherit;
       font-size: 0.9rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
     input:focus, select:focus {
       outline: none;
       border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
     }
     .actions {
       display: flex;
       gap: 1rem;
       margin-top: 1.5rem;
+      flex-wrap: wrap;
     }
     footer {
       text-align: center;
       margin-top: 3rem;
       color: var(--text-muted);
-      font-size: 0.85rem;
+      font-size: 0.875rem;
     }
-    footer a { color: var(--primary); text-decoration: none; }
+    footer a { color: var(--primary); text-decoration: none; font-weight: 500; }
     footer a:hover { text-decoration: underline; }
   </style>
 </head>
@@ -210,7 +229,7 @@ HOME_HTML = """<!DOCTYPE html>
         <span class="badge">FastAPI</span>
         <span class="badge">Gemini 3.6 Flash</span>
         <span class="badge">Header-based Auth</span>
-        <span class="badge">PDF & Image Support</span>
+        <span class="badge">PDF & Image OCR</span>
       </div>
     </header>
 
