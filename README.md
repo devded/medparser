@@ -41,22 +41,11 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 3. Configure Environment Variables
+The server holds no configuration of its own — no `.env` file needed. Every caller supplies their
+own Gemini API key and model per request via the `X-Gemini-Api-Key` and `X-Gemini-Model` headers
+(see below), and CORS is open to any origin.
 
-Create a `.env` file from `.env.example`:
-
-```bash
-cp .env.example .env
-```
-
-Add your Gemini API key to `.env`:
-
-```env
-GEMINI_API_KEY=your_gemini_api_key_here
-GEMINI_MODEL=gemini-3.6-flash
-```
-
-### 4. Run the Server
+### 3. Run the Server
 
 ```bash
 uvicorn main:app --reload
@@ -70,15 +59,14 @@ The API will be available at `http://127.0.0.1:8000`. Interactive API documentat
 
 ### `GET /health`
 
-Returns service status, the configured Gemini model, and whether an API key is set.
+Returns service status and the headers required to call `/extract`.
 
 **Example response:**
 
 ```json
 {
   "status": "online",
-  "model": "gemini-3.6-flash",
-  "api_key_configured": true
+  "required_headers": ["X-Gemini-Api-Key", "X-Gemini-Model"]
 }
 ```
 
@@ -88,6 +76,9 @@ Upload a medical report (PDF or image — JPEG, PNG, WEBP, or HEIC) to extract s
 
 **Request:**
 - Content-Type: `multipart/form-data`
+- Headers:
+  - `X-Gemini-Api-Key` (**required**) — your own Gemini API key
+  - `X-Gemini-Model` (**required**) — the Gemini model to use, e.g. `gemini-3.6-flash`
 - Body: `file` (PDF or image binary, up to 15MB)
 
 **Example with cURL:**
@@ -95,9 +86,12 @@ Upload a medical report (PDF or image — JPEG, PNG, WEBP, or HEIC) to extract s
 ```bash
 curl -X POST "http://127.0.0.1:8000/extract" \
   -H "accept: application/json" \
-  -H "Content-Type: multipart/form-data" \
+  -H "X-Gemini-Api-Key: YOUR_GEMINI_API_KEY" \
+  -H "X-Gemini-Model: gemini-3.6-flash" \
   -F "file=@/path/to/medical_report.pdf"
 ```
+
+Omitting `X-Gemini-Api-Key` returns `401 Unauthorized`; omitting `X-Gemini-Model` returns `400 Bad Request`.
 
 **Example response:**
 
