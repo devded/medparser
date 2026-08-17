@@ -1,5 +1,5 @@
 APP_TITLE = "MediReport AI Extractor API"
-APP_DESCRIPTION = "Medical Report Extraction using Gemini 3.6 Flash & FastAPI"
+APP_DESCRIPTION = "Medical Report Extraction using Gemini 3.7 / 3.6 Flash & FastAPI"
 APP_VERSION = "1.0.0"
 
 # Auth is via the X-Gemini-Api-Key header, not cookies, so a wildcard origin is
