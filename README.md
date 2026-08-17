@@ -78,7 +78,7 @@ Upload a medical report (PDF or image — JPEG, PNG, WEBP, or HEIC) to extract s
 - Content-Type: `multipart/form-data`
 - Headers:
   - `X-Gemini-Api-Key` (**required**) — your own Gemini API key
-  - `X-Gemini-Model` (**required**) — the Gemini model to use, e.g. `gemini-3.6-flash`
+  - `X-Gemini-Model` (**required**) — the Gemini model to use, e.g. `gemini-3.7-flash`
 - Body: `file` (PDF or image binary, up to 15MB)
 
 **Example with cURL:**
@@ -87,7 +87,7 @@ Upload a medical report (PDF or image — JPEG, PNG, WEBP, or HEIC) to extract s
 curl -X POST "http://127.0.0.1:8000/extract" \
   -H "accept: application/json" \
   -H "X-Gemini-Api-Key: YOUR_GEMINI_API_KEY" \
-  -H "X-Gemini-Model: gemini-3.6-flash" \
+  -H "X-Gemini-Model: gemini-3.7-flash" \
   -F "file=@/path/to/medical_report.pdf"
 ```
 
