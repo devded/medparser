@@ -1,0 +1,8 @@
+{
+  "scanned_at": "2026-08-17T10:41:00Z",
+  "font_stack": "Space Grotesk + Inter + JetBrains Mono",
+  "palette": "Cobalt OKLCH custom properties (tokens.css / :root)",
+  "microinteractions": "native JS IntersectionObserver + command palette",
+  "spacing_scale": "4-pt named scale (--space-3xs to --space-3xl)",
+  "framework": "FastAPI (Python)"
+}
